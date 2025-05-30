@@ -9,6 +9,7 @@ import math
 import os
 from PIL import ImageFont, ImageDraw, Image
 from modules.utils import Vector_Normalization
+from unicode import join_jamos
 fontpath = "fonts/HMKMMAG.TTF"
 font = ImageFont.truetype(fontpath, 40)
 
@@ -51,6 +52,7 @@ for target in testTargetList:
     seq = []
     action_seq = []
     last_action = None
+    jamo_list = []
 
     while cap.isOpened():
         ret, img = cap.read()
@@ -112,14 +114,16 @@ for target in testTargetList:
                 this_action = action
 
                 if last_action != this_action:
+                    jamo_list.append(this_action)
                     last_action = this_action
-            
-            # 한글 폰트 출력    
+
+            sentence = join_jamos(''.join(jamo_list)) if jamo_list else ''
+
+            # 한글 폰트 출력
             img_pil = Image.fromarray(img)
             draw = ImageDraw.Draw(img_pil)
 
-            # org=(int(right_hand_lmList.landmark[0].x * img.shape[1]), int(right_hand_lmList.landmark[0].y * img.shape[0] + 20))
-            draw.text((10,30), f'{action.upper()}', font=font, fill=(255, 255, 255))
+            draw.text((10,30), sentence, font=font, fill=(255, 255, 255))
             
             img = np.array(img_pil)
 
