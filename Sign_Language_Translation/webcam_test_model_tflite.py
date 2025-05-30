@@ -10,7 +10,7 @@ from tensorflow.keras.models import load_model
 import math
 from modules.utils import Vector_Normalization
 from PIL import ImageFont, ImageDraw, Image
-# from unicode import join_jamos
+from unicode import join_jamos
 
 fontpath = "fonts/HMKMMAG.TTF"
 font = ImageFont.truetype(fontpath, 40)
@@ -37,7 +37,7 @@ seq = []
 action_seq = []
 last_action = None
 
-# zamo_list=[]
+jamo_list = []
 
 while cap.isOpened():
     ret, img = cap.read()
@@ -112,26 +112,21 @@ while cap.isOpened():
             this_action = action
 
             if last_action != this_action:
+                jamo_list.append(this_action)
                 last_action = this_action
-        '''
-        # 기록된 한글 파악
-        if zamo_list[-1] != this_action: # 만약 전에 기록된 글자와 이번 글자가 다르다면
-            zamo_list.append(this_action)
-        
-        zamo_str = ''.join(zamo_list) # 리스트에 있는 단어 합침
-        unitl_action = join_jamos(zamo_str) # 합친 단어 한글로 만들기
-        '''
+
+        sentence = join_jamos(''.join(jamo_list)) if jamo_list else ''
         
         # 한글 폰트 출력    
         img_pil = Image.fromarray(img)
         draw = ImageDraw.Draw(img_pil)
-        '''
-        draw.text((int(right_hand_lmList.landmark[0].x * img.shape[1]), int(right_hand_lmList.landmark[0].y * img.shape[0] + 20)),
-                  f'{this_action.upper()}', 
-                  font=font, 
-                  fill=(255, 255, 255))
-        '''
-        draw.text((10, 30), f'{action.upper()}', font=font, fill=(255, 255, 255))
+        draw.text(
+            (int(right_hand_lmList.landmark[0].x * img.shape[1]),
+             int(right_hand_lmList.landmark[0].y * img.shape[0] + 20)),
+            f'{this_action.upper()}',
+            font=font,
+            fill=(255, 255, 255))
+        draw.text((10, 30), sentence, font=font, fill=(255, 255, 255))
 
         img = np.array(img_pil)
 
